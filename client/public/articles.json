@@ -1,0 +1,15 @@
+[
+    {
+      "id": 1,
+      "title": "First Article",
+      "date": "2023-10-01",
+      "content": "This is the content of the first article."
+    },
+    {
+      "id": 2,
+      "title": "Second Article",
+      "date": "2023-10-02",
+      "content": "This is the content of the second article."
+    }
+  ]
+  
