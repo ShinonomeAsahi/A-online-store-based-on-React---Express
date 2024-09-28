@@ -10,7 +10,7 @@ const options = {
       title: "API",
       version: "1.0.0",
       description: "FAN_CLUB WEB 项目 API",
-      servers: [{ url: 'http://localhost:3001' }],
+      servers: [{ url: 'http://localhost:3000' }],
     },
   },
   // 去哪个路由下收集swagger注释

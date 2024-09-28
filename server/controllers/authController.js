@@ -56,6 +56,11 @@ const getUserInfo = async (req, res) => {
     console.error('Error in getUserInfo:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
+  
+ 
+  
 };
-
-module.exports = { register, login, logout, getUserInfo };
+const test = (req, res) => {
+  res.status(200).json({ message: 'Test endpoint is working' });
+};
+module.exports = { register, login, logout, getUserInfo,test };

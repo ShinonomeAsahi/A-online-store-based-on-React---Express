@@ -19,6 +19,8 @@ import TopicDetail from './pages/TopicDetail';
 import ResetPassword from './pages/ResetPassword';
 import MyOrders from './pages/MyOrders';
 import OrderDetails from './pages/OrderDetails';
+import Discussion from "./pages/discussion/Discussion"
+import DiscussionDetail from "./pages/discussion/DetailView"
 
 function App() {
   return (
@@ -44,6 +46,8 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/my-orders" element={<MyOrders />} />
         <Route path="/my-orders/:orderId" element={<OrderDetails />} />
+        <Route path="/discussion" element={<Discussion />} />
+        <Route path="/discussion/detail" element={<DiscussionDetail />} />
       </Routes>    
     </BrowserRouter>
   );
