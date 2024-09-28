@@ -1,7 +1,7 @@
 // 连接到MongoDB数据库
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://youruser:password@yourhost:27017/yourdb', {
+mongoose.connect('mongodb://your_user:your_password@your_host:27017/your_db', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => {
