@@ -8,6 +8,8 @@ import Cart from '../pages/Cart';
 import ProductOverview from '../pages/ProductOverview';
 import CheckCart from '../pages/CheckCart';
 import Shop from "../pages/Shop";
+import Discussion from "../pages/discussion/Discussion"
+import DiscussionDetail from "../pages/discussion/DetailView"
 
 const Routes = () => {
   const { token } = useAuth();
@@ -69,6 +71,14 @@ const Routes = () => {
         {
           path: "/checkout",
           element: <CheckCart />,
+        },
+        {
+          path: "/discussion",
+          element: <Discussion />,
+        },
+        {
+          path: "/discussion/detail",
+          element: <DiscussionDetail />,
         },
       ],
     },

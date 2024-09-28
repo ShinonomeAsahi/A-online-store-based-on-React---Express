@@ -170,6 +170,12 @@ export default function NavBar() {
                           <Link to="/Blog">Community</Link>
                       </button>
                     </div>
+
+                    <div>
+                      <button className="relative flex border-b-2 border-black text-black hover:text-gray-700 text-sm">
+                          <Link to="/discussion">Discussion</Link>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

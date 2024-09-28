@@ -51,7 +51,8 @@ app.use('/api/users', authenticateToken, userRoutes);
 app.use('/api/contents', authenticateToken, contentRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/userCarts', authenticateToken, userCartRoutes);
-app.use('/api/discussions', authenticateToken, discussionRoutes);
+// app.use('/api/discussions', authenticateToken, discussionRoutes);
+app.use('/api/discussions',  discussionRoutes);
 // 捕获404错误
 app.use((req, res, next) => {
     res.status(404).send('Sorry, that route does not exist.');
