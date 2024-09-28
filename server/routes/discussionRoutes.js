@@ -1,5 +1,5 @@
 const express = require('express');
-const { createDiscussion, getDiscussionList, getDiscussionById } = require('../controllers/discussionController');
+const { createDiscussion, getDiscussionList, getDiscussionById, createDiscussionComment } = require('../controllers/discussionController');
 const router = express.Router();
 
 /**,
@@ -55,7 +55,7 @@ router.get('/getDiscussionList', getDiscussionList);
  * /api/discussions/getDiscussionById:
  *   get:
  *     tags:
- *       - 内容管理
+ *       - 讨论管理
  *     summary: 根据Id获取详情讨论详情
  *     parameters:
  *       - name: discussion_id
@@ -71,5 +71,34 @@ router.get('/getDiscussionList', getDiscussionList);
  *         description: Invalid input
  */
 router.get('/getDiscussionById', getDiscussionById);
+
+/**,
+ * @swagger
+ * /api/discussions/createDiscussionComment:
+ *   post:
+ *     tags:
+ *       - 讨论管理
+ *     summary: 新增讨论评论
+ *     requestBody:
+ *       description: User object
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               discussion_id:
+ *                 type: string
+ *               user_id:
+ *                 type: string
+ *               comment_body:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: successful operation
+ *       400:
+ *         description: Invalid input
+ */
+router.post('/createDiscussionComment', createDiscussionComment);
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const mongoose = require('../config/mongoose');
 
-const disscussionCommentsSchema = new mongoose.Schema({
+const disscussionCommentSchema = new mongoose.Schema({
   discussion_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Discussion',
@@ -26,5 +26,5 @@ const disscussionCommentsSchema = new mongoose.Schema({
   },
 });
 
-const DiscussionComments = mongoose.model('DiscussionComments', disscussionCommentsSchema);
-module.exports = DiscussionComments;
+const DiscussionComment = mongoose.model('DiscussionComment', disscussionCommentSchema);
+module.exports = DiscussionComment;

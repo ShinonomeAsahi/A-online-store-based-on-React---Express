@@ -31,7 +31,7 @@ const login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid password' });
     }
-    const token = jwt.sign({ user_id: user._id, user_name: user.user_name }, secretKey, { expiresIn: '1h' });
+    const token = jwt.sign({ user_id: user._id, user_name: user.user_name }, secretKey, { expiresIn: '24h' });
     res.status(200).json({ message: 'Login successful', token: 'Bearer ' + token, user_id: user._id, user_name: user.user_name });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -56,11 +56,6 @@ const getUserInfo = async (req, res) => {
     console.error('Error in getUserInfo:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-  
- 
-  
 };
-const test = (req, res) => {
-  res.status(200).json({ message: 'Test endpoint is working' });
-};
-module.exports = { register, login, logout, getUserInfo,test };
+
+module.exports = { register, login, logout, getUserInfo };

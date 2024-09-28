@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 // const { authenticateToken } = require('../middleware/authMiddleware');
 // router.use(authenticateToken);
-const { addToCart, reduceFromCart, removeFromCart, getUserCart, checkout } = require('../controllers/userCartController');
+const { addToCart, updateQuantity, removeFromCart, getUserCart, checkout } = require('../controllers/userCartController');
 
 /**,
  * @swagger
@@ -37,11 +37,11 @@ router.post('/addToCart', addToCart);
 
 /**,
  * @swagger
- * /api/userCarts/reduceFromCart:
+ * /api/userCarts/updateQuantity:
  *   post:
  *     tags:
  *       - 购物车管理
- *     summary: 减少购物车商品数量
+ *     summary: 更新购物车商品数量
  *     produces:
  *       - application/json
  *     requestBody:
@@ -64,7 +64,7 @@ router.post('/addToCart', addToCart);
  *       400:
  *         description: Invalid input
  */
-router.post('/reduceFromCart', reduceFromCart);
+router.post('/updateQuantity', updateQuantity);
 
 /**,
  * @swagger
