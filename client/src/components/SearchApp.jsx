@@ -1,8 +1,26 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon, SearchIcon } from '@heroicons/react/24/outline';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function SearchApp({ isSearchOpen, closeSearch }) {
+    const [searchTerm, setSearchTerm] = useState('');
+    const navigate = useNavigate();
+
+    const handleSearch = async (e) => {
+        if (e.key === 'Enter') {
+            try {
+                const response = await axios.get(`http://localhost:3001/api/products/getProductBySearch?search=${searchTerm}`);
+                // Navigate to ProductLists page with search results
+                navigate('/shop', { state: { products: response.data, searchTerm } });
+                closeSearch();
+            } catch (error) {
+                console.error('Error fetching search results:', error);
+            }
+        }
+    };
+
     return (
         <Transition.Root show={isSearchOpen} as={Fragment}>
             <Dialog as="div" className="relative z-10" onClose={closeSearch}>
@@ -34,7 +52,6 @@ export default function SearchApp({ isSearchOpen, closeSearch }) {
                                     <div className="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
                                         <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 bg-slate-100">
                                             <div className="flex items-start justify-between">
-                                                {/* <Dialog.Title className="text-lg font-medium text-gray-900">Search</Dialog.Title> */}
                                                 <div className="ml-3 flex h-7 items-center">
                                                     <button
                                                         type="button"
@@ -53,7 +70,10 @@ export default function SearchApp({ isSearchOpen, closeSearch }) {
                                                     <input
                                                         type="text"
                                                         className="w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm hover:ring-gray-500 hover:border-gray-500 transition-all duration-300 sm:text-sm"
-                                                        placeholder="最新猫咪产品"
+                                                        placeholder="Search for your cats"
+                                                        value={searchTerm}
+                                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                                        onKeyPress={handleSearch}
                                                     />
                                                     <div className="sm:flex sm:flex-row-reverse">
                                                         <button

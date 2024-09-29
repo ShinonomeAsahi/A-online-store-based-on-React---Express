@@ -1,60 +1,67 @@
 import React, { useState, useEffect } from 'react';
-import { getDiscussions } from '../../../api/discussionApi.js'; // 导入你的 API 函数
+import axios from 'axios';
+import { useAuth } from '../../../provider/AuthProvider';
 import ArticleItem from './ArticleItem';
 import CreateDiscussionButton from '../Button/CreateDiscussionButton.jsx';
-import axios from 'axios';
 
-const ArticleList = ({ message }) => {
-  const [articles, setArticles] = useState([]); // 初始化为预设文章
-  const [loading, setLoading] = useState(true); // 加载状态
-  const [error, setError] = useState(null); // 错误状态
-
+const ArticleList = ({ category }) => {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { token } = useAuth();
+  const [createDiscussion, setCreateDiscussion] = useState(false);
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await axios.get('http://localhost:3010/api/discussions/getDiscussionList'); // 获取讨论数据
+        const response = await axios.get('http://localhost:3001/api/discussions/getDiscussionByCategory', {
+          params: {
+            category_id: category._id
+          },
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         
-        // 确保 data 是数组
         if (Array.isArray(response.data)) {
-          setArticles(response.data); // 更新状态
+          setArticles(response.data);
         } else {
-          throw new Error('获取的数据不是有效的数组'); // 抛出错误
+          throw new Error('获取的数据不是有效的数组');
         }
       } catch (err) {
-        setError(err); // 捕获错误
+        setError(err);
       } finally {
-        setLoading(false); // 请求完成
+        setLoading(false);
       }
     };
 
-    fetchArticles();
-  }, []); // 只在组件挂载时执行一次
+    if (category && category._id) {
+      fetchArticles();
+    }
+  }, [category, token]);
 
-  // 加载状态
+  const handleCreateDiscussion = (discussion) => {
+    setCreateDiscussion(true);
+  };
+
   if (loading) {
-    return <div>加载中...</div>; // 显示加载中的指示器
+    return <div>加载中...</div>;
   }
 
-  // 错误处理
   if (error) {
-    return <div>出现错误: {error.message}</div>; // 显示错误信息
+    return <div>出现错误: {error.message}</div>;
   }
 
-  // 渲染文章列表
   return (
     <div className="max-w-3xl mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">{message}</h1>
-        {/* <button className="bg-gray-900 text-white py-2 px-4 rounded-lg shadow-md hover:bg-gray-800 transition duration-200">
-          发布讨论
-        </button> */}
-        <CreateDiscussionButton></CreateDiscussionButton>
+        <h1 className="text-2xl font-bold">{category.category_name}</h1>
+        <CreateDiscussionButton onCreate={handleCreateDiscussion} category={[category]} />
       </div>
       {articles.length === 0 ? (
-        <div>没有文章可显示</div> // 当没有文章时的提示
+        <div>No Articles</div>
       ) : (
         articles.map((article) => (
-          <ArticleItem key={article.id} article={article} /> // 使用 article.id 作为 key
+          <ArticleItem key={article._id} article={article} />
         ))
       )}
     </div>

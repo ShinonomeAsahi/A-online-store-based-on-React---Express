@@ -7,17 +7,22 @@ import visaIcon from "../assets/paymentIcons/visa.svg";
 import mastercardIcon from "../assets/paymentIcons/mastercard.svg";
 import jcbIcon from "../assets/paymentIcons/jcb.svg";
 import unionpayIcon from "../assets/paymentIcons/unionpay.svg";
+import { useAuth } from "../provider/AuthProvider";
+import PaymentProcess from "../components/PaymentProcess";
 
 export default function CheckCart() {
   const navigate = useNavigate();
   const location = useLocation();
   const { cart } = location.state || { cart: [] };
+  const { token, user_id } = useAuth();
+  const [showPaymentProcess, setShowPaymentProcess] = useState(false);
+  const [orderId, setOrderId] = useState(null);
 
   // Calculate total price
   const totalPrice = cart
     .reduce((total, item) => {
-      const price = parseFloat(item.product_price);
-      const quantity = parseInt(item.quantity, 10);
+      const price = parseFloat(item.product_id.product_price);
+      const quantity = parseInt(item.user_cart_quantity, 10);
       if (!isNaN(price) && !isNaN(quantity)) {
         return total + price * quantity;
       }
@@ -40,14 +45,46 @@ export default function CheckCart() {
   const handlePayment = async (e) => {
     e.preventDefault();
     try {
-      // 处理订单创建
-      const response = await axios.post("http://localhost:3001/api/orders", { cart, totalPrice });
-      setPaymentStatus("Payment successful!");
-      setTimeout(() => {
-        navigate(`/my-orders/${response.data.orderId}`);
-      }, 3000);
+      // 创建订单
+      const orderResponse = await axios.post("http://localhost:3001/api/orders/createOrder", {
+        user_id: user_id,
+        order_total_amount: parseFloat(totalPrice) + shippingFee,
+        order_status: "pending",
+        order_items: cart.map(item => ({
+          product_id: item.product_id._id,
+          quantity: item.user_cart_quantity,
+          price: item.product_id.product_price,
+          discount: 0
+        }))
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      setOrderId(orderResponse.data._id);
+      setShowPaymentProcess(true);
     } catch (error) {
-      console.error("Payment failed:", error);
+      console.error("Order creation failed:", error);
+      setPaymentStatus("Order creation failed. Please try again.", error);
+    }
+  };
+
+  const handlePaymentComplete = async () => {
+    try {
+      // 支付成功后更新订单状态
+      await axios.post("http://localhost:3001/api/orders/paymentSuccess", {
+        order_id: orderId,
+        user_id: user_id
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setPaymentStatus("Payment successful!");
+      navigate(`/my-orders/${orderId}`);
+    } catch (error) {
+      console.error("Payment status update failed:", error);
       setPaymentStatus("Payment failed. Please try again.");
     }
   };
@@ -70,24 +107,24 @@ export default function CheckCart() {
             {cart.map((product, index) => (
               <li key={index} className="flex py-6">
                 <img
-                  src={product.product_img_url.match(urlPattern)[0]}
-                  alt={product.product_name}
+                  src={product.product_id.product_img_url.match(urlPattern)[0]}
+                  alt={product.product_id.product_name}
                   className="h-24 w-24 flex-shrink-0 rounded-md object-cover object-center"
                 />
                 <div className="ml-4 flex flex-1 flex-col">
                   <div>
                     <div className="flex justify-between text-base font-medium text-gray-900">
-                      <h3>{product.product_name}</h3>
+                      <h3>{product.product_id.product_name}</h3>
                       <p className="ml-4">
-                        ${parseFloat(product.product_price).toFixed(2)}
+                        ${parseFloat(product.product_id.product_price).toFixed(2)}
                       </p>
                     </div>
                     <p className="mt-1 text-sm text-gray-500">
-                      {product.product_color}
+                      {product.product_id.product_color}
                     </p>
                   </div>
                   <div className="flex items-end justify-between text-sm">
-                    <p className="text-gray-500">Quantity {product.quantity}</p>
+                    <p className="text-gray-500">Quantity {product.user_cart_quantity}</p>
                   </div>
                 </div>
               </li>
@@ -186,6 +223,7 @@ export default function CheckCart() {
                   id="expiration-date"
                   name="expiration-date"
                   autoComplete="cc-exp"
+                  placeholder="12/25"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-md focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
@@ -193,6 +231,7 @@ export default function CheckCart() {
                 <label
                   htmlFor="cvc"
                   className="block text-sm font-medium text-gray-700 mb-2"
+                  placeholder="123"
                 >
                   CVC
                 </label>
@@ -201,6 +240,7 @@ export default function CheckCart() {
                   id="cvc"
                   name="cvc"
                   autoComplete="csc"
+                  placeholder="123"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-md focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
@@ -280,6 +320,7 @@ export default function CheckCart() {
             <button
               type="submit"
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              onClick={handlePayment}
             >
               Pay now
             </button>
@@ -289,6 +330,9 @@ export default function CheckCart() {
           <div className="mt-4 text-center text-lg">{paymentStatus}</div>
         )}
       </section>
+      {showPaymentProcess && (
+        <PaymentProcess onComplete={handlePaymentComplete} />
+      )}
     </div>
   );
 }

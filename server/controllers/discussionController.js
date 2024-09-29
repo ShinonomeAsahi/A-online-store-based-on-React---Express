@@ -1,10 +1,35 @@
-const { Discussion, DiscussionComment, User } = require('../models');
+const { Discussion, DiscussionComment, DiscussionCategory, User } = require('../models');
 
 exports.createDiscussion = async (req, res) => {
-  const { discussion_title, discussion_body, user_id } = req.body;
+  const { discussion_title, discussion_category, discussion_body, created_by } = req.body;
   try {
-    const discussion = await Discussion.create({ discussion_title, discussion_body, user_id });
+    const discussion = new Discussion({ discussion_title, discussion_category, discussion_body, created_by: created_by });
+    await discussion.save();
     res.status(201).json({ message: 'Discussion created successfully', discussion });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.createDiscussionCategory = async (req, res) => {
+  const { category_name, category_admin } = req.body;
+  try {
+    const category = new DiscussionCategory({ category_name, category_admin });
+    await category.save();
+    res.status(201).json({ message: 'Discussion category created successfully', category });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getNewDiscussion = async (req, res) => {
+  const { number } = req.query;
+  try {
+    const discussions = await Discussion.find({}).populate({
+      path: 'created_by',
+      select: 'user_name' // 只选择 user_name 字段
+    }).sort({ created_at: -1 }).limit(number);
+    res.status(200).json(discussions);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -12,138 +37,108 @@ exports.createDiscussion = async (req, res) => {
 
 exports.getDiscussionList = async (req, res) => {
   try {
- 
-
-
-
-
-    const discussions = await Discussion.aggregate([
-      {
-        $lookup: {
-          from: 'users', // 联合的集合名称
-          localField: 'created_by', // Discussion 中的 created_by 字段
-          foreignField: '_id', // users 中的 _id 字段
-          as: 'user' // 返回的用户数组字段名
-        }
-      },
-      {
-        $unwind: { path: '$user', preserveNullAndEmptyArrays: true } // 展开用户信息
-      },
-      {
-        $lookup: {
-          from: 'discussioncomments', // 联合的集合名称
-          localField: '_id', // Discussion 的 _id 字段
-          foreignField: 'articleId', // discussioncomments 中的 articleId 字段
-          as: 'comments' // 返回的评论数组字段名
-        }
-      },
-      {
-        $addFields: {
-          commentsCount: { $size: '$comments' } // 添加评论数量字段
-        }
-      },
-      {
-        $project: {
-            comments: 0 // 删除 comments 字段
-        }
-    },
-
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: ["$$ROOT", { created_by: {
-              id: '$user._id', // 用户的 ID
-              username: '$user.user_name' // 用户的用户名
-          },  commentsCount: '$commentsCount' }]
-          }
-        }
-      }
-    ]);
-
+    const discussions = await Discussion.find({})
+      .populate({
+        path: 'created_by',
+        select: 'user_name' // 只选择 user_name 字段
+      })
+      .populate({
+        path: 'discussion_category',
+        select: 'category_name' // 只选择 category_name 字段
+      });
     res.status(200).json(discussions);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-
-};
-
-// 辅助函数：构建评论树
-const buildCommentTree = (comments) => {
-  const map = {};
-  const roots = [];
-
-  // 将每个评论放入 map 中，以便快速查找
-  comments.forEach(comment => {
-      map[comment._id] = { ...comment._doc, replies: [] }; // 初始化 replies 数组
-  });
-  // 根据 parentCommentId 关联评论
-  comments.forEach(comment => {
-      if (comment.parentCommentId) {
-          const parentComment = map[comment.parentCommentId];
-          if (parentComment) {
-              // 如果找到父级评论，则将当前评论添加到父级评论的 replies 数组中
-              parentComment.replies.push(map[comment._id]);
-          } else {
-              console.warn(`Parent comment with ID ${comment.parentCommentId} not found for comment ID ${comment._id}`);
-          }
-      } else {
-          // 否则视为根评论
-          roots.push(map[comment._id]);
-      }
-  });
-
-  return roots;
 };
 
 exports.getDiscussionById = async (req, res) => {
   const { discussion_id } = req.query;
   try {
-    
-      // 查找讨论
-      const discussion = await Discussion.findById(discussion_id).populate({
-          path: 'created_by',
-          select: 'user_name'
-      });
-
-      if (!discussion) {
-          return res.status(404).json({ message: 'Discussion not found' });
-      }
-      // console.log(discussion_id)
-      // 查找与该讨论相关的评论，获取所有字段
-      const comments = await DiscussionComment.find({ articleId: discussion_id }).populate({
-          path: 'userId',
-          select: 'user_name'
-      })
-      // console.log(comments)
-      const commentTree = buildCommentTree(comments);
-      // console.log(commentTree)
-      const discussionObj = discussion.toObject(); 
-      // 将评论添加到讨论对象中
-      discussionObj.comments = commentTree;
-    //  console.log(discussion)
-      res.status(200).json(discussionObj);
+    const discussion = await Discussion.findById(discussion_id).populate({
+      path: 'created_by',
+      select: 'user_name'
+    });
+    if (!discussion) {
+      return res.status(404).json({ message: 'Discussion not found' });
+    }
+    res.status(200).json(discussion);
   } catch (error) {
     res.status(500).json({ error: error.message });
-    // console.log(error)
-      res.status(500).json({ error: error.message });
   }
 };
 
-
-// 创建评论
-exports.createComment = async (req, res) => {
-  // console.log(req.body)
+exports.getDiscussionByUserId = async (req, res) => {
+  const { user_id } = req.query;
   try {
-    const comment = new DiscussionComment({
-      articleId: req.body.articleId,
-      parentCommentId: req.body.parentCommentId,
-      userId: req.body.userId,
-      content: req.body.content,
-    });
-    await comment.save();
-    // console.log(comment)
-    res.status(201).json(comment);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+    const discussion = await Discussion.find({ created_by: user_id })
+    if (!discussion) {
+      return res.status(404).json({ message: 'Discussion not found' });
+    }
+    res.status(200).json(discussion);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
+
+exports.getCommentByUserId = async (req, res) => {
+  const { user_id } = req.query;
+  try {
+    const comments = await DiscussionComment.find({ discussion_comment_user_id: user_id })
+    .populate({
+      path: 'discussion_id',
+      select: 'discussion_title'
+    });
+    res.status(200).json(comments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+  
+
+exports.createDiscussionComment = async (req, res) => {
+  const { discussion_id, discussion_comment_user_id, discussion_comment_content } = req.body;
+  try {
+    const comment = new DiscussionComment({ discussion_id, discussion_comment_user_id, discussion_comment_content });
+    await comment.save();
+    res.status(201).json({ message: 'Comment created successfully', comment });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getDiscussionCommentByDiscussionId = async (req, res) => {
+  const { discussion_id } = req.query;
+  try {
+    const comments = await DiscussionComment.find({ discussion_id }).populate({
+      path: 'discussion_comment_user_id',
+      select: 'user_name'
+    });
+    res.status(200).json(comments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getDiscussionCategory = async (req, res) => {
+  try {
+    const categories = await DiscussionCategory.find({});
+    res.status(200).json(categories);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getDiscussionByCategory = async (req, res) => {
+  const { category_id } = req.query;
+  try {
+    const discussions = await Discussion.find({ discussion_category: category_id }).populate({
+      path: 'created_by',
+      select: 'user_name' // 只选择 user_name 字段
+    });
+    res.status(200).json(discussions);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+

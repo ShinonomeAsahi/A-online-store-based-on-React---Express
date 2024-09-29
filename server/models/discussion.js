@@ -5,7 +5,7 @@ const discussionSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  content_body: String,
+  discussion_body: String,
   discussion_category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'DiscussionCategory',

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createOrder, deleteOrder, getOrdersByUser, updateOrder } = require('../controllers/orderController');
+const { createOrder, deleteOrder, getOrderInfo, getOrdersByUser, updateOrder, paymentSuccess, getOrderDetailsByOrderId } = require('../controllers/orderController');
 
 /**,
  * @swagger
@@ -19,12 +19,12 @@ const { createOrder, deleteOrder, getOrdersByUser, updateOrder } = require('../c
  *           schema:
  *             type: object
  *             properties:
-    *               user_id:
- *                 type: integer
- *               product_id:
- *                 type: integer
- *               cart_quantity:
- *                 type: integer
+ *               user_id:
+ *                 type: string
+ *               order_total_amount:
+ *                 type: number
+ *               order_status:
+ *                 type: string
  *     responses:
  *       200:
  *         description: successful operation
@@ -35,28 +35,78 @@ router.post('/createOrder', createOrder);
 
 /**,
  * @swagger
+ * /api/orders/paymentSuccess:
+ *   post:
+ *     tags:
+ *       - 订单管理
+ *     summary: 支付成功
+ *     produces:
+ *       - application/json
+ *     requestBody:
+ *       description: Order object
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               order_id:
+ *                 type: string
+ *               user_id:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: successful operation
+ *       400:
+ *         description: Invalid input
+ */
+router.post('/paymentSuccess', paymentSuccess);
+
+/**,
+ * @swagger
+ * /api/orders/getOrderInfo:
+ *   post:
+ *     tags:
+ *       - 订单管理
+ *     summary: 获取订单详情
+ *     produces:
+ *       - application/json
+ *     requestBody:
+ *       description: Order object
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               order_id:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: successful operation
+ *       400:
+ *         description: Invalid input
+ */
+router.post('/getOrderInfo', getOrderInfo);
+
+/**,
+ * @swagger
  * /api/orders/getOrdersByUser:
- *   get:
+ *   post:
  *     tags:
  *       - 订单管理
  *     summary: 获取用户订单
  *     produces:
  *       - application/json
- *     parameters:
- *       - name: user_id
- *         in: query
- *         required: true
- *         description: 用户ID
- *         schema:
- *           type: integer
- *     responses:
+ *     requestBody:
+ *       description: Order object
+ *       required: true
+ *       content:   
+ *         application/json:
+ *           schema:
  *             type: object
  *             properties:
- *               order_id: 
- *                 type: string
- *               product_id:
- *                 type: string
- *               order_quantity:
+ *               user_id:
  *                 type: string
  *     responses:
  *       200:
@@ -116,5 +166,32 @@ router.post('/updateOrder', updateOrder);
  *         description: Invalid input
  */
 router.post('/deleteOrder', deleteOrder);
+
+/**,
+ * @swagger
+ * /api/orders/getOrderDetailsByOrderId:
+ *   post:
+ *     tags:
+ *       - 订单管理
+ *     summary: 获取订单详情
+ *     produces:
+ *       - application/json
+ *     requestBody:
+ *       description: Order object
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               order_id:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: successful operation
+ *       400:
+ *         description: Invalid input
+ */
+router.post('/getOrderDetailsByOrderId', getOrderDetailsByOrderId);
 
 module.exports = router;

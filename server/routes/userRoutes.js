@@ -1,5 +1,16 @@
-const express = require('express');
-const { getUserName, checkRepeatUserName, updateUserPassword, addUserInfo, updateUserInfo, getUserInfo, followUser } = require('../controllers/userController');
+const express = require("express");
+const {
+  getUserName,
+  checkRepeatUserName,
+  updateUserPassword,
+  addUserInfo,
+  updateUserInfo,
+  getUserInfo,
+  followUser,
+  getUserFollow,
+  getUserFollowed,
+  getNewUser,
+} = require("../controllers/userController");
 const router = express.Router();
 
 /**
@@ -15,7 +26,7 @@ const router = express.Router();
  *       400:
  *         description: Invalid input
  */
-router.get('/getUserName', getUserName);
+router.get("/getUserName", getUserName);
 
 /**
  * @swagger
@@ -42,7 +53,7 @@ router.get('/getUserName', getUserName);
  *       400:
  *         description: Invalid input
  */
-router.post('/checkRepeatUserName', checkRepeatUserName);
+router.post("/checkRepeatUserName", checkRepeatUserName);
 
 /**,
  * @swagger
@@ -71,7 +82,7 @@ router.post('/checkRepeatUserName', checkRepeatUserName);
  *       400:
  *         description: Invalid input
  */
-router.post('/resetPassword', updateUserPassword);
+router.post("/resetPassword", updateUserPassword);
 
 /**,
  * @swagger
@@ -111,7 +122,7 @@ router.post('/resetPassword', updateUserPassword);
  *       400:
  *         description: Invalid input
  */
-router.post('/updateUserInfo', updateUserInfo);
+router.post("/updateUserInfo", updateUserInfo);
 
 /**,
  * @swagger
@@ -133,7 +144,7 @@ router.post('/updateUserInfo', updateUserInfo);
  *       400:
  *         description: Invalid input
  */
-router.get('/getUserInfo', getUserInfo);
+router.get("/getUserInfo", getUserInfo);
 
 /**,
  * @swagger
@@ -162,7 +173,79 @@ router.get('/getUserInfo', getUserInfo);
  *       400:
  *         description: Invalid input
  */
-router.post('/followUser', followUser);
+router.post("/followUser", followUser);
+
+/**,
+ * @swagger
+ * /api/users/getUserFollow:
+ *   get:
+ *     tags:
+ *       - 用户管理
+ *     summary: 获取用户关注
+ *     parameters:
+ *       - name: user_id
+ *         in: query
+ *         required: true
+ *         description: 用户ID
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: successful operation
+ *       400:
+ *         description: Invalid input
+ */
+router.get("/getUserFollow", getUserFollow);
+
+/**,
+ * @swagger
+ * /api/users/getUserFollowed:
+ *   get:
+ *     tags:
+ *       - 用户管理
+ *     summary: 获取用户关注
+ *     parameters:
+ *       - name: user_id
+ *         in: query
+ *         required: true
+ *         description: 用户ID
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: successful operation
+ *       400:
+ *         description: Invalid input
+ */
+router.get("/getUserFollowed", getUserFollowed);
+
+/**,
+ * @swagger
+ * /api/users/getUserFollowed:
+ *   get:
+ *     tags:
+ *       - 用户管理
+ *     summary: 获取用户被关注
+
+
+/**,
+ * @swagger
+ * /api/users/getNewUser:
+ *   get:
+ *     tags:
+ *       - 用户管理
+ *     summary: 获取最新用户
+ *     parameters:
+ *       - name: number
+ *         in: query
+ *         required: true
+ *         description: 获取数量
+ *     responses:
+ *       200:
+ *         description: successful operation
+ *       400:
+ *         description: Invalid input
+ */
+router.get("/getNewUser", getNewUser);
 
 module.exports = router;
-

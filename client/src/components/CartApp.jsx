@@ -1,30 +1,51 @@
 import { Fragment, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from '../provider/AuthProvider';
 
 export default function CartApp({ cart, setCart, open, setOpen }) {
-  // const [cart, setCart] = useState([]);
-
-  const handleRemove = (productId) => {
-    setCart(cart.filter(product => product.product_id !== productId));
+  const { user_id, token } = useAuth();
+  const headers = {
+    'Authorization': `Bearer ${token}`
   };
 
-  const handleQuantityChange = (productId, quantity) => {
-    setCart(cart.map(product =>
-      product.product_id === productId ? { ...product, quantity: quantity } : product
-    ));
-  };
+  const updateCartItemQuantity = async (productId, newQuantity) => {
+    try {
+      const response = await axios.post('http://localhost:3001/api/userCarts/updateQuantity', {
+        user_id,
+        product_id: productId,
+        cart_quantity: newQuantity
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
+      if (response.data.message === 'Item removed from cart') {
+        setCart(prevCart => prevCart.filter(item => item.product_id._id !== productId));
+      } else {
+        setCart(prevCart => prevCart.map(item => 
+          item.product_id._id === productId 
+            ? { ...item, user_cart_quantity: newQuantity }
+            : item
+        ));
+      }
+    } catch (error) {
+      console.error('Error updating cart item:', error);
+    }
+  };
+  
   // 使用正则匹配图片URL
   const urlPattern = /(https?:\/\/[^\s]+)/g;
 
   // 计算购物车商品总价
   const totalPrice = cart.reduce((total, item) => {
-    const price = parseFloat(item.product_price);
-    return total + price * item.quantity;
-  }, 0).toFixed(2)
+    if (item.product_id && item.product_id.product_price) {
+      const price = parseFloat(item.product_id.product_price);
+      return total + price * item.user_cart_quantity;
+    }
+    return total;
+  }, 0).toFixed(2);
 
   useEffect(() => {
     if (cart.length > 0) {
@@ -84,8 +105,8 @@ export default function CartApp({ cart, setCart, open, setOpen }) {
                               <li key={index} className="flex py-6">
                                 <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                                   <img
-                                    src={product.product_img_url.match(urlPattern)[0]}
-                                    alt={product.imageAlt}
+                                    src={product.product_id.product_img_url.match(urlPattern)[0]}
+                                    alt={product.product_id.imageAlt}
                                     className="h-full w-full object-cover object-center"
                                   />
                                 </div>
@@ -94,25 +115,25 @@ export default function CartApp({ cart, setCart, open, setOpen }) {
                                   <div>
                                     <div className="flex justify-between text-base font-medium text-gray-900">
                                       <h3>
-                                        <a href={product.product_href}>{product.product_name}</a>
+                                        <a href={product.product_id.product_href}>{product.product_id.product_name}</a>
                                       </h3>
-                                      <p className="ml-4">${product.product_price}</p>
+                                      <p className="ml-4">${product.product_id.product_price}</p>
                                     </div>
-                                    <p className="mt-1 text-sm text-gray-500">{product.product_color}</p>
+                                    <p className="mt-1 text-sm text-gray-500">{product.product_id.product_color}</p>
                                   </div>
                                   <div className="flex flex-1 items-end justify-between text-sm">
                                     {/* <label htmlFor={`quantity-${product.id}`} className="mr-2 text-gray-500">
                                       Qty
                                     </label> */}
                                     <div id='quantity-input' className="relative flex items-stretch h-10 rounded-md border-slate-600 shadow-sm shadow-slate-500">
-                                      <button id='minus-button' type="button" className="font-medium text-2xl border-2 border-slate-600 text-gray-800 w-8" onClick={() => handleQuantityChange(product.product_id, product.quantity - 1)}>-</button>
-                                      <div id='quantity-display' className="border-y-2 border-slate-600 flex items-center pl-3 w-8" aria-hidden='true'>{product.quantity}</div>
-                                      <button id='add-button' type="button" className="font-medium border-2 border-slate-600 text-xl text-gray-800 w-8" onClick={() => handleQuantityChange(product.product_id, product.quantity + 1)}>+</button>
+                                      <button id='minus-button' type="button" className="font-medium text-2xl border-2 border-slate-600 text-gray-800 w-8" onClick={() => updateCartItemQuantity(product.product_id._id, product.user_cart_quantity - 1)}>-</button>
+                                      <div id='quantity-display' className="border-y-2 border-slate-600 flex items-center pl-3 w-8" aria-hidden='true'><p>{product.user_cart_quantity}</p></div>
+                                      <button id='add-button' type="button" className="font-medium border-2 border-slate-600 text-xl text-gray-800 w-8" onClick={() => updateCartItemQuantity(product.product_id._id, product.user_cart_quantity + 1)}>+</button>
                                     </div>
                                     <div className="flex">
                                       <button
                                         type="button"
-                                        onClick={() => handleRemove(product.product_id)}
+                                        onClick={() => updateCartItemQuantity(product.product_id._id, 0)}
                                         className="font-medium text-indigo-600 hover:text-indigo-500"
                                       >
                                         Remove

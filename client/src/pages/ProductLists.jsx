@@ -1,50 +1,82 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, useLocation } from "react-router-dom";
 import axios from "axios";
-import { ShoppingCartIcon } from '@heroicons/react/24/outline'
-import ProductItem from '../components/ProductItem';
-import CartApp from '../components/CartApp';
-import { useAuth } from '../provider/AuthProvider';
+import { ShoppingCartIcon } from "@heroicons/react/24/outline";
+import ProductItem from "../components/ProductItem";
+import CartApp from "../components/CartApp";
+import { useAuth } from "../provider/AuthProvider";
 
-const baseURL = 'http://localhost:3001/api';
+const baseURL = "http://localhost:3001/api";
 
 export default function ProductLists() {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cart, setCart] = useState([]);
   const [open, setOpen] = useState(false);
-  const { token } = useAuth(); // Use token from AuthProvider
+  const { user_id, token } = useAuth(); // Use token from AuthProvider
   const { product_category } = useParams();
+  const location = useLocation();
+  const searchResults = location.state?.products;
+  const searchTerm = location.state?.searchTerm;
   // 使用正则匹配图片URL
   const urlPattern = /(https?:\/\/[^\s]+)/g;
-  console.log('token:', token); // Log the token immediately after retrieving it
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(`${baseURL}/products`);
-        const filteredProducts = product_category 
-          ? response.data.filter(product => product.product_category === product_category)
-          : response.data; // If category is null, show all products
-        setProducts(filteredProducts);
+        if (searchResults) {
+          setProducts(searchResults);
+        } else {
+          const response = await axios.get(`${baseURL}/products`);
+          const filteredProducts = product_category
+            ? response.data.filter(
+                (product) => product.product_category === product_category
+              )
+            : response.data;
+          setProducts(filteredProducts);
+        }
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error("Error fetching products:", error);
       }
     };
-
     fetchProducts();
-  }, [product_category]);
+  }, [product_category, searchResults]);
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const response = await axios.get(
+          `${baseURL}/userCarts/getUserCart`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            params: {
+              user_id: user_id,
+            },
+          }
+        );
+        console.log("Cart response data:", response.data.cartItems); // Log the response data
+        setCart(response.data.cartItems);
+      } catch (error) {
+        console.error("Error fetching cart:", error);
+      }
+    };
+    if (token) {
+      fetchCart();
+    }
+  }, [token]);
 
   const addToCart = (product) => {
-    const existingProduct = cart.find(item => item.id === product._id);
+    const existingProduct = cart.find(item => item.product_id._id === product._id);
     if (existingProduct) {
       setCart(cart.map(item =>
-        item.id === product._id
-          ? { ...item, quantity: item.quantity + 1 }
+        item.product_id._id === product._id
+          ? { ...item, user_cart_quantity: item.user_cart_quantity + 1 }
           : item
       ));
     } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
+      setCart([...cart, { product_id: product, user_cart_quantity: 1 }]);
     }
   };
 
@@ -58,7 +90,7 @@ export default function ProductLists() {
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-32 lg:max-w-7xl lg:px-8">
-      {/* <h1>{product_category ? `in ${product_category.replace('-', ' ')}` : ''}</h1> */}
+        {/* <h1>{product_category ? `in ${product_category.replace('-', ' ')}` : ''}</h1> */}
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
           {products.map((product) => (
@@ -71,8 +103,12 @@ export default function ProductLists() {
                   onClick={() => onItemClick(product)}
                 />
               </div>
-              <h3 className="mt-4 text-sm text-gray-700">{product.product_name}</h3>
-              <p className="mt-1 text-lg font-medium text-gray-900">${product.product_price}</p>
+              <h3 className="mt-4 text-sm text-gray-700">
+                {product.product_name}
+              </h3>
+              <p className="mt-1 text-lg font-medium text-gray-900">
+                ${product.product_price}
+              </p>
             </div>
           ))}
         </div>
@@ -82,9 +118,13 @@ export default function ProductLists() {
             className="relative rounded-full p-1 text-gray-600 hover:text-gray-900 border-2 border-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             onClick={() => setOpen(true)}
           >
-            {cartItemCount > 0 && <div className='box-border text-center left-4 -top-1 z-10 absolute w-5 h-5 rounded-full bg-red-700 text-white text-base'>
-                <span className="inline-block text-white relative bottom-0.5">{cartItemCount}</span>
-            </div>}
+            {cartItemCount > 0 && (
+              <div className="box-border text-center left-4 -top-1 z-10 absolute w-5 h-5 rounded-full bg-red-700 text-white text-base">
+                <span className="inline-block text-white relative bottom-0.5">
+                  {cartItemCount}
+                </span>
+              </div>
+            )}
             <span className="absolute -inset-1.5" />
             <span className="sr-only">View cart</span>
             <ShoppingCartIcon className="h-6 w-6" aria-hidden="true" />
@@ -92,9 +132,12 @@ export default function ProductLists() {
         </div>
       </div>
       {selectedProduct && (
-        <ProductItem 
-          product={selectedProduct} 
-          onAddToCart={addToCart} 
+        <ProductItem
+          product={selectedProduct}
+          onAddToCart={(product) => {
+            addToCart(product);
+            setOpen(true); // Open the cart after adding a product
+          }}
           onClose={() => setSelectedProduct(null)}
         />
       )}

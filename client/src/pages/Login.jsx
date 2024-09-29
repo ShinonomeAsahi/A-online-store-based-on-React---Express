@@ -103,8 +103,9 @@ const Login = () => {
             />
           </div>
           <button type="submit" className="w-full bg-gray-900 text-white py-2 rounded hover:bg-white hover:text-gray-900 hover:border hover:border-gray-900 transition-all duration-500">登录</button>
-          <div className="mt-4 text-center">
+          <div className="flex justify-between mt-4 text-center">
             <Link to="/reset-password" className="text-sm text-gray-500 hover:text-gray-700">忘记密码?</Link>
+            <Link to="/register" className="text-sm text-gray-500 hover:text-gray-700">注册</Link>
           </div>
         </form>
       </div>

@@ -32,7 +32,6 @@ export default function ProductOverview({ onAddToCart }) {
           const response = await axios.get(`${baseURL}/getProductById`, {
             params: { product_id: product_id }
           });
-          console.log(product_id)
           setProduct(response.data);
         } catch (error) {
           // Handle error
@@ -105,14 +104,14 @@ export default function ProductOverview({ onAddToCart }) {
                       <StarIcon
                         key={rating}
                         className={classNames(
-                          reviews.average > rating ? 'text-gray-900' : 'text-gray-200',
+                          product.product_rating > rating ? 'text-gray-900' : 'text-gray-200',
                           'h-5 w-5 flex-shrink-0'
                         )}
                         aria-hidden="true"
                       />
                     ))}
                   </div>
-                  <p className="sr-only">{reviews.average} out of 5 stars</p>
+                  <p className="sr-only">{product.product_rating} out of 5 stars</p>
                   <a href={reviews.href} className="ml-3 text-sm font-medium text-indigo-600 hover:text-indigo-500">
                     {reviews.totalCount} reviews
                   </a>

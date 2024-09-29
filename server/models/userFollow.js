@@ -1,6 +1,6 @@
 const mongoose = require('../config/mongoose');
 
-const userFollowsSchema = new mongoose.Schema({
+const userFollowSchema = new mongoose.Schema({
   user_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -9,6 +9,7 @@ const userFollowsSchema = new mongoose.Schema({
   // 用户关注的用户id
   followed_user_id: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
     unique: true,
   },
@@ -27,5 +28,5 @@ const userFollowsSchema = new mongoose.Schema({
   },
 });
 
-const UserFollows = mongoose.model('UserFollows', userFollowsSchema);
-module.exports = UserFollows;
+const UserFollow = mongoose.model('UserFollow', userFollowSchema);
+module.exports = UserFollow;

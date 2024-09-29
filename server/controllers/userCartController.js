@@ -28,7 +28,7 @@ exports.updateQuantity = async (req, res) => {
   try {
     const result = await UserCart.findOneAndUpdate(
       { user_id, product_id },
-      { $inc: { user_cart_quantity: new_cart_quantity } },
+      { user_cart_quantity: new_cart_quantity },
       { new: true, upsert: true }
     );
 

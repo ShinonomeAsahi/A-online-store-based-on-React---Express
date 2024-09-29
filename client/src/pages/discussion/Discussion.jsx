@@ -8,7 +8,6 @@ function Discussion() {
     <div className="">  
       {/* <Header className="mb-4" /> */}
       <Content></Content > 
-      <Footer />  
     </div>  
   );  
 }

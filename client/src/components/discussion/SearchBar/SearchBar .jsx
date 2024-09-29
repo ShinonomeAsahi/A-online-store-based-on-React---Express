@@ -4,7 +4,7 @@ import React from 'react';
 const SearchBar = () => {
   return (
 <div className="mb-4"> {/* 增加底部的留白 */}
-  <div className="flex items-center bg-black border border-gray-300 rounded-md shadow-md p-2">
+  <div className="flex items-center bg-gray-600 border border-gray-300 rounded-md shadow-md p-2">
     <input
       type="text"
       placeholder="搜索..."

@@ -1,39 +1,31 @@
-// MiniList.jsx
-import React from 'react';
-import ListItem from './ListItem';
+import React, { useState, useEffect } from 'react';
+import ListItem from './ListItem'; // 假设 ListItem 组件在这个路径
 
-const discussions = [
-  {
-    author: { name: 'Alice', icon: 'https://via.placeholder.com/32' },
-    title: 'How to improve your coding skills?',
-    date: '2024-09-25',
-    commentsCount: 5,
-  },
-  {
-    author: { name: 'Bob', icon: 'https://via.placeholder.com/32' },
-    title: 'Understanding React hooks',
-    date: '2024-09-24',
-    commentsCount: 3,
-  },
-  {
-    author: { name: 'Charlie', icon: 'https://via.placeholder.com/32' },
-    title: 'Tailwind CSS tips and tricks',
-    date: '2024-09-23',
-    commentsCount: 7,
-  },
-];
+const MiniList = ({ title, newDiscussions: initialDiscussions }) => {
+  const [discussions, setDiscussions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-const MiniList = ({title}) => {
+  useEffect(() => {
+    if (initialDiscussions && initialDiscussions.length > 0) {
+      setDiscussions(initialDiscussions);
+      setIsLoading(false);
+    }
+  }, [initialDiscussions]);
+
+  if (isLoading) {
+    // return <div>Loading...</div>; // 或者使用一个加载动画组件
+  }
+
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden mb-4">
       <h2 className="text-base font-bold p-4 border-b">{title}</h2>
-      {discussions.map((discussion, index) => (
+      {discussions.map(item => (
         <ListItem
-          key={index}
-          author={discussion.author}
-          title={discussion.title}
-          date={discussion.date}
-          commentsCount={discussion.commentsCount}
+          key={item._id}
+          author={item.created_by.user_name}
+          title={item.discussion_title}
+          date={item.createdAt}
+          commentsCount={6}
         />
       ))}
     </div>

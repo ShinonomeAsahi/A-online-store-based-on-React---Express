@@ -1,5 +1,5 @@
 const express = require('express');
-const { createProduct, getProducts, getProductById, getProductByCategory, getTopTenProducts } = require('../controllers/productController');
+const { createProduct, getProducts, getProductById, getProductByCategory, getTopTenProducts, getProductBySearch } = require('../controllers/productController');
 const router = express.Router();
 
 /**,
@@ -95,6 +95,30 @@ router.get('/getProductById', getProductById);
  *         description: Invalid input
  */
 router.get('/getProductByCategory', getProductByCategory);
+
+/**,
+ * @swagger
+ * /api/products/getProductBySearch:
+ *   get:
+ *     tags:
+ *       - 商品管理
+ *     summary: 通过商品名称模糊搜索商品
+ *     parameters:
+ *       - name: search
+ *         in: query
+ *         required: true
+ *         description: 商品名称
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: successful operation
+ *       400:
+ *         description: Invalid input
+ */
+router.get('/getProductBySearch', getProductBySearch);
+
+
 
 /**,
  * @swagger

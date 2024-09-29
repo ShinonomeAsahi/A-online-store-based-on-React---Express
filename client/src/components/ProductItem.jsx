@@ -2,11 +2,15 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
-// import ProductOverview from '../pages/ProductOverview';
+import { useAuth } from '../provider/AuthProvider';
+import { Navigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function ProductItem({ product, onAddToCart, onClose }) {
   // 设置 open 状态，初始值为 true
   const [open, setOpen] = useState(true);
+  const { token, user_id } = useAuth();
+  const [error, setError] = useState(null);
 
   // 设置 open 状态，当 product 变化时触发
   useEffect(() => {
@@ -14,9 +18,29 @@ export default function ProductItem({ product, onAddToCart, onClose }) {
   }, [product]);
 
   // 添加商品到购物车
-  const handleAddToCart = () => {
-    onAddToCart({ ...product, quantity: 1 });
-    handleClose();
+  const handleAddToCart = async () => {
+    if (!user_id) {
+      setError('User not logged in');
+      return;
+    }
+    try {
+      const response = await axios.post('http://localhost:3001/api/userCarts/addToCart', 
+        {
+          user_id: user_id,
+          product_id: product._id,
+          cart_quantity: 1
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      onAddToCart(product);
+      handleClose();
+    } catch (error) {
+      setError(error.response?.data?.error || error.message || 'An unknown error occurred');
+    }
   };
 
   // 关闭对话框
@@ -127,10 +151,19 @@ export default function ProductItem({ product, onAddToCart, onClose }) {
                       </Link>
                       <button class="h-10 px-10 font-semibold rounded-md border border-slate-200 text-slate-900" 
                       type="button"
-                      onClick={handleAddToCart}
+                      // 用户点击add to cart时，如果用户未登录，则跳转到登录页面
+                      // 如果用户已登录，则调用/api/userCarts/addToCart接口，将商品添加到购物车，实现前后端同步
+                      onClick={() => {
+                        if (token) {
+                          handleAddToCart();
+                        } else {
+                          Navigate("/login");
+                        }
+                      }}
                       >
                         Add To Cart
                       </button>
+                      {error && <p className="text-red-500">{error}</p>}
                     </div>
                     <button class="flex-none flex items-center justify-center w-9 h-9 rounded-md text-slate-300 border border-slate-200" type="button" aria-label="Like">
                       <svg width="20" height="20" fill="currentColor" aria-hidden="true">

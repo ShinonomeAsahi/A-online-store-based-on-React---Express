@@ -6,10 +6,6 @@ const orderSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  order_type: {
-    type: String,
-    required: true,
-  },
   order_total_amount: {
     type: Number,
     required: true,

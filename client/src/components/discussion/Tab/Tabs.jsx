@@ -1,41 +1,92 @@
 // Tabs.jsx
-import React, { useState } from 'react';
-import ArticleList from '../Article/ArticleList';
-import PopularView from './PopularView';
-
-const tabs = [
-  { id: 1, label: '热榜', content: <PopularView title={'热榜'}/> },
-  { id: 2, label: '最新', content: <ArticleList></ArticleList> },
-  { id: 3, label: 'Following', content: <ArticleList></ArticleList> },
-];
+import React, { useState, useEffect } from 'react';
+import CateView from './CateView'; // 假设我们有一个新的统一视图组件
+import axios from 'axios';
+import { useAuth } from '../../../provider/AuthProvider';
 
 const Tabs = () => {
-  const [activeTab, setActiveTab] = useState(tabs[0].id);
+  const { token } = useAuth();
+  const [activeTab, setActiveTab] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [newDiscussions, setNewDiscussions] = useState([]);
+  const [newUsers, setNewUsers] = useState([]);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get("http://localhost:3001/api/discussions/getDiscussionCategory", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setCategories(res.data);
+        localStorage.setItem("categories", JSON.stringify(res.data));
+        if (res.data.length > 0) {
+          setActiveTab(res.data[0]._id);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, [token]);
+
+  useEffect(() => {
+    const fetchNewDiscussion = async () => {
+      const res = await axios.get("http://localhost:3001/api/discussions/getNewDiscussion",{
+        params: {
+          number: 3
+        },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      setNewDiscussions(res.data)
+    }
+    fetchNewDiscussion()
+  }, [token])
+
+  useEffect(() => {
+    const fetchNewUser = async () => {
+      const res = await axios.get("http://localhost:3001/api/users/getNewUser",{
+        params: {
+          number: 3
+        },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      setNewUsers(res.data)
+    }
+    fetchNewUser()
+  }, [token])
 
   return (
-    <div className="mx-auto">
+    <div className="mx-auto pb-10">
       <div className="flex justify-between items-center border-b border-gray-300 mb-4">
         <div className="flex space-x-4">
-          {tabs.map(tab => (
+          {categories.map(category => (
             <button
-              key={tab.id}
+              key={category._id}
               className={`py-2 px-4 text-sm font-medium focus:outline-none rounded-lg transition ${
-                activeTab === tab.id
-                  ? 'bg-gray-900 text-white'
+                activeTab === category._id
+                  ? 'bg-gray-600 text-white'
                   : 'text-gray-900 hover:bg-gray-100'
               }`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => setActiveTab(category._id)}
             >
-              {tab.label}
+              {category.category_name}
             </button>
           ))}
         </div>
-        {/* <button className="bg-gray-900 text-white py-1.5 px-4 rounded-lg shadow-md hover:bg-gray-800 transition duration-200">
-          发布讨论
-        </button> */}
       </div>
       <div className="p-6 bg-white shadow-md rounded-lg mt-4">
-        {tabs.find(tab => tab.id === activeTab).content}
+        {activeTab && (
+          <CateView 
+            category={categories.find(cat => cat._id === activeTab)} 
+            newDiscussions={newDiscussions}
+            newUsers={newUsers}
+          />
+        )}
       </div>
     </div>
   );

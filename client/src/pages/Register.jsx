@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-
+import { useNavigate } from 'react-router-dom';
 const Register = () => {
   const [formData, setFormData] = useState({
     user_name: '',
@@ -9,7 +9,7 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
+  const navigate = useNavigate();
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -23,6 +23,7 @@ const Register = () => {
       const response = await axios.post('http://localhost:3001/api/auth/register', formData);
       console.log(response.data);
       setSuccess('注册成功，请登录');
+      navigate('/login');
       setFormData({
         user_name: '',
         user_password: '',
@@ -101,7 +102,7 @@ const Register = () => {
               required
             />
           </div>
-          <button type="submit" className="w-full bg-green-500 text-white py-2 rounded">注册</button>
+          <button type="submit" className="w-full bg-gray-900 text-white py-2 rounded hover:bg-white hover:text-gray-900 hover:border hover:border-gray-900 transition-all duration-500">注册</button>
         </form>
       </div>
     </div>

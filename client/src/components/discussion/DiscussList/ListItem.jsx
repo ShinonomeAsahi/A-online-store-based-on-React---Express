@@ -2,11 +2,13 @@
 import React from 'react';
 
 const ListItem = ({ author, title, date, commentsCount }) => {
+  // 随机获取1-9的整数
+  const randomInt = Math.floor(Math.random() * 9) + 1;
   return (
     <div className="flex flex-col p-4 border-b border-gray-300">
       <div className="flex items-center mb-1"> {/* 调整底部留白 */}
         <img
-          src={author.icon}
+          src={require(`../../../assets/images/avatar/0${randomInt}.png`)}
           alt={author.name}
           className="w-5 h-5 rounded-full mr-2"
         />

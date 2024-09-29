@@ -12,6 +12,14 @@ const userDetailSchema = new mongoose.Schema({
   user_gender: String,
   user_address: String,
   user_phone_number: String,
+  created_at: {
+    type: Date,
+    default: Date.now,
+  },
+  updated_at: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const UserDetail = mongoose.model('UserDetail', userDetailSchema);

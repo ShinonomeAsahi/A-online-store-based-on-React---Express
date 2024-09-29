@@ -1,34 +1,34 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../../provider/AuthProvider';
+import axios from 'axios';
 
 const Comment = ({ comment, articleId }) => {
-  const [replies, setReplies] = useState(comment.replies || []); // 使用传入的回复初始化
+  const [replies, setReplies] = useState(comment.replies || []);
   const [replyText, setReplyText] = useState('');
   const [showReplyInput, setShowReplyInput] = useState(false); // 控制回复框的显示
+  const { token, user_id } = useAuth();
 
   const handleReplySubmit = async (e) => {
     e.preventDefault();
     if (replyText.trim()) {
-      const newReply = {
-        articleId: articleId,
-        parentCommentId: comment._id, // 将父评论 ID 传递给 API
-        userId: '66eec2e4a1e89011c1aa87e2', // 假设当前用户 ID
-        content: replyText,
-      };
-
       try {
-        const response = await fetch('http://localhost:3010/api/discussions/createComment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await axios.post(
+          "http://localhost:3001/api/discussions/createDiscussionComment",
+          {
+            discussion_comment_parent_id: comment._id,
+            discussion_id: articleId,
+            discussion_comment_user_id: user_id,
+            discussion_comment_content: replyText,
           },
-          body: JSON.stringify(newReply),
-        });
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        console.log('comment_id: ', comment._id)
 
-        if (!response.ok) {
-          throw new Error('Failed to submit reply');
-        }
-
-        const savedComment = await response.json();
+        const savedComment = response.data;
         // 添加新的回复
         setReplies([...replies, { ...savedComment, replies: [] }]); // 确保新回复具有正确结构
         setReplyText(''); // 清空输入框
@@ -39,18 +39,22 @@ const Comment = ({ comment, articleId }) => {
     }
   };
 
+  const randomInt = () => {
+    return Math.floor(Math.random() * 9) + 1;
+  }
+
   return (
-    <div className="border-l-2 border-gray-300 pl-4 mt-2">
+    <div className="border-l-2 border-gray-300 pl-4 mt-6">
       <div className="flex items-center">
         {/* 显示头像 */}
         <img
-          src={'https://picsum.photos/200'} // 替换为用户头像的 URL 或默认图像
+          src={require('../../../assets/images/avatar/0' + randomInt() + '.png')} // 替换为用户头像的 URL 或默认图像
           alt="User Avatar"
           className="w-6 h-6 rounded-full mr-2" // 设置头像样式
         />
-        <p className="font-semibold">{comment.userId.user_name}</p>
+        <p className="font-semibold">{comment.discussion_comment_user_id.user_name}</p>
       </div>
-      <p className="text-sm text-gray-600">{comment.content}</p>
+      <p className="text-sm text-gray-600">{comment.discussion_comment_content}</p>
       <button 
         className="text-blue-500 text-sm mt-1" 
         onClick={() => setShowReplyInput(!showReplyInput)} // 切换输入框的显示状态
@@ -77,8 +81,8 @@ const Comment = ({ comment, articleId }) => {
       {/* 显示子评论 */}
       {replies.length > 0 && (
         <div className="mt-2">
-          {replies.map((reply, index) => (
-            <Comment key={index} comment={reply} articleId={articleId} />
+          {replies.map(reply => (
+            <Comment key={reply._id} comment={reply} articleId={articleId} />
           ))}
         </div>
       )}

@@ -1,19 +1,27 @@
 // MiniList.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ListItem from './ListItem';
 
-const authors = [
-  { name: 'Alice', icon: 'https://via.placeholder.com/40' },
-  { name: 'Bob', icon: 'https://via.placeholder.com/40' },
-  { name: 'Charlie', icon: 'https://via.placeholder.com/40' },
-];
+const MiniList = ({newUsers: initialUsers }) => {
+  const [newUsers, setNewUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-const MiniList = () => {
+  useEffect(() => {
+    if (initialUsers && initialUsers.length > 0) {
+      setNewUsers(initialUsers);
+      setIsLoading(false);
+    }
+  }, [initialUsers]);
+
+  if (isLoading) {
+    // return <div>Loading...</div>; // 或者使用一个加载动画组件
+  }
+
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden mb-4">
       <h2 className="text-base font-bold p-4 border-b">Latest Startups</h2>
-      {authors.map((author, index) => (
-        <ListItem key={index} author={author} />
+      {newUsers.map(user => (
+        <ListItem key={user._id} author={user} />
       ))}
     </div>
   );

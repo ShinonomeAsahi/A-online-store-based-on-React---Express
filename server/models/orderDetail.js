@@ -33,5 +33,5 @@ const orderDetailsSchema = new mongoose.Schema({
   },
 });
 
-const OrderDetails = mongoose.model('OrderDetails', orderDetailsSchema);
-module.exports = OrderDetails;
+const OrderDetail = mongoose.model('OrderDetail', orderDetailsSchema);
+module.exports = OrderDetail;
