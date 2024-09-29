@@ -1,4 +1,4 @@
-const mongoose = require('../config/mongoose.js'); // Ensure this path is correct
+const mongoose = require('../config/mongoose'); // Ensure this path is correct
 const path = require('path');
 const fs = require('fs');
 const basename = path.basename(__filename);

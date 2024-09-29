@@ -71,6 +71,7 @@ router.get('/getDiscussionList', getDiscussionList);
  *         description: Invalid input
  */
 router.get('/getDiscussionById', getDiscussionById);
+
 // 创建评论
 router.post('/createComment', createComment);
 module.exports = router;

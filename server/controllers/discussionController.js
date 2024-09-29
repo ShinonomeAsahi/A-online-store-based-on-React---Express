@@ -12,6 +12,11 @@ exports.createDiscussion = async (req, res) => {
 
 exports.getDiscussionList = async (req, res) => {
   try {
+ 
+
+
+
+
     const discussions = await Discussion.aggregate([
       {
         $lookup: {
@@ -93,6 +98,7 @@ const buildCommentTree = (comments) => {
 exports.getDiscussionById = async (req, res) => {
   const { discussion_id } = req.query;
   try {
+    
       // 查找讨论
       const discussion = await Discussion.findById(discussion_id).populate({
           path: 'created_by',
@@ -117,10 +123,12 @@ exports.getDiscussionById = async (req, res) => {
     //  console.log(discussion)
       res.status(200).json(discussionObj);
   } catch (error) {
+    res.status(500).json({ error: error.message });
     // console.log(error)
       res.status(500).json({ error: error.message });
   }
 };
+
 
 // 创建评论
 exports.createComment = async (req, res) => {

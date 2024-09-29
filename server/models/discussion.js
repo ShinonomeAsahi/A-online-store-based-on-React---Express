@@ -1,4 +1,4 @@
-const mongoose = require('../config/mongoose.js');
+const mongoose = require('../config/mongoose');
 
 const discussionSchema = new mongoose.Schema({
   discussion_title: {
