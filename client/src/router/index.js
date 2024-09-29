@@ -72,12 +72,13 @@ const Routes = () => {
           path: "/checkout",
           element: <CheckCart />,
         },
+       
         {
           path: "/discussion",
           element: <Discussion />,
         },
         {
-          path: "/discussion/detail",
+          path: "/discussion/detail/:discussion_id",
           element: <DiscussionDetail />,
         },
       ],

@@ -47,7 +47,7 @@ function App() {
         <Route path="/my-orders" element={<MyOrders />} />
         <Route path="/my-orders/:orderId" element={<OrderDetails />} />
         <Route path="/discussion" element={<Discussion />} />
-        <Route path="/discussion/detail" element={<DiscussionDetail />} />
+        <Route path="/discussion/detail/:discussion_id" element={<DiscussionDetail />} />
       </Routes>    
     </BrowserRouter>
   );

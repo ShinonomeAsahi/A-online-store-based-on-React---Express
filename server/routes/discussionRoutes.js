@@ -1,5 +1,5 @@
 const express = require('express');
-const { createDiscussion, getDiscussionList, getDiscussionById } = require('../controllers/discussionController');
+const { createDiscussion, getDiscussionList, getDiscussionById,createComment } = require('../controllers/discussionController');
 const router = express.Router();
 
 /**,
@@ -71,5 +71,6 @@ router.get('/getDiscussionList', getDiscussionList);
  *         description: Invalid input
  */
 router.get('/getDiscussionById', getDiscussionById);
-
+// 创建评论
+router.post('/createComment', createComment);
 module.exports = router;
