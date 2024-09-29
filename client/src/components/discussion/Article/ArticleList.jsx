@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { getDiscussions } from '../../../api/discussionApi.js'; // 导入你的 API 函数
 import ArticleItem from './ArticleItem';
+import CreateDiscussionButton from '../Button/CreateDiscussionButton.jsx';
 import axios from 'axios';
 
-
-const ArticleList=({ message }) => {
+const ArticleList = ({ message }) => {
   const [articles, setArticles] = useState([]); // 初始化为预设文章
   const [loading, setLoading] = useState(true); // 加载状态
   const [error, setError] = useState(null); // 错误状态
@@ -17,7 +17,6 @@ const ArticleList=({ message }) => {
         // 确保 data 是数组
         if (Array.isArray(response.data)) {
           setArticles(response.data); // 更新状态
-          // console.log(response.data)
         } else {
           throw new Error('获取的数据不是有效的数组'); // 抛出错误
         }
@@ -44,18 +43,22 @@ const ArticleList=({ message }) => {
   // 渲染文章列表
   return (
     <div className="max-w-3xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">{message}</h1>
-      {articles.map((article) =>(<ArticleItem key={article.id} article={article} />))
-      /* {
-      articles.test === 0 ? (
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">{message}</h1>
+        {/* <button className="bg-gray-900 text-white py-2 px-4 rounded-lg shadow-md hover:bg-gray-800 transition duration-200">
+          发布讨论
+        </button> */}
+        <CreateDiscussionButton></CreateDiscussionButton>
+      </div>
+      {articles.length === 0 ? (
         <div>没有文章可显示</div> // 当没有文章时的提示
       ) : (
-        articles.test.map((article) => (
+        articles.map((article) => (
           <ArticleItem key={article.id} article={article} /> // 使用 article.id 作为 key
         ))
-      )} */
-      }
+      )}
     </div>
   );
-}
+};
+
 export default ArticleList;

@@ -9,7 +9,7 @@ const Comment = ({ comment, articleId }) => {
     e.preventDefault();
     if (replyText.trim()) {
       const newReply = {
-        articleId:articleId,
+        articleId: articleId,
         parentCommentId: comment._id, // 将父评论 ID 传递给 API
         userId: '66eec2e4a1e89011c1aa87e2', // 假设当前用户 ID
         content: replyText,
@@ -41,7 +41,15 @@ const Comment = ({ comment, articleId }) => {
 
   return (
     <div className="border-l-2 border-gray-300 pl-4 mt-2">
-      <p className="font-semibold">{comment.userId.user_name}</p>
+      <div className="flex items-center">
+        {/* 显示头像 */}
+        <img
+          src={'https://picsum.photos/200'} // 替换为用户头像的 URL 或默认图像
+          alt="User Avatar"
+          className="w-6 h-6 rounded-full mr-2" // 设置头像样式
+        />
+        <p className="font-semibold">{comment.userId.user_name}</p>
+      </div>
       <p className="text-sm text-gray-600">{comment.content}</p>
       <button 
         className="text-blue-500 text-sm mt-1" 
@@ -53,14 +61,14 @@ const Comment = ({ comment, articleId }) => {
       {/* 回复输入框 */}
       {showReplyInput && (
         <form onSubmit={handleReplySubmit} className="mt-2">
-          <input
-            type="text"
+          <textarea
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
             placeholder="Write a reply..."
-            className="border rounded p-1 w-full"
+            className="border rounded p-4 w-full h-22 focus:outline-none focus:ring-2 focus:ring-gray-900 transition duration-200"
           />
-          <button type="submit" className="bg-blue-500 text-white rounded p-1 mt-1">
+
+          <button type="submit" className="w-full bg-gray-900 text-white py-2 rounded hover:bg-white hover:text-gray-900 hover:border hover:border-gray-900 transition-all duration-500 mt-1">
             Submit
           </button>
         </form>

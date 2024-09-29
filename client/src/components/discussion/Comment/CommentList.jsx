@@ -50,14 +50,13 @@ const CommentList = ({commentsData,articleId}) => {
     <div>
       {/* 顶级评论输入框 */}
       <form onSubmit={handleNewCommentSubmit} className="mb-4">
-        <input
-          type="text"
-          value={newCommentText}
-          onChange={(e) => setNewCommentText(e.target.value)}
-          placeholder="Write a comment..."
-          className="border rounded p-1 w-full"
-        />
-        <button type="submit" className="bg-blue-500 text-white rounded p-1 mt-1">
+      <textarea
+  value={newCommentText}
+  onChange={(e) => setNewCommentText(e.target.value)}
+  placeholder="Write a comment..."
+  className="border border-gray-300 rounded-lg p-4 w-full h-32 focus:outline-none focus:ring-2 focus:ring-gray-900 transition duration-200"
+/>
+        <button type="submit" className="w-full bg-gray-900 text-white py-2 rounded hover:bg-white hover:text-gray-900 hover:border hover:border-gray-900 transition-all duration-500 mt-1">
           Submit
         </button>
       </form>
